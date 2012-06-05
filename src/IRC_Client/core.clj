@@ -2,7 +2,8 @@
   (:use [seesaw.core])
   (:require [seesaw.selector :as selector])
   (:import (java.net Socket)
-           (java.io PrintWriter InputStreamReader BufferedReader)))
+           (java.io PrintWriter InputStreamReader BufferedReader)
+  (panels SettingsFrame ChatWindow)))
 
 (defn identify [root]
   (doseq [w (select root [:*])]
