@@ -1,11 +1,10 @@
 (ns irc
-   (:use [seesaw.core])
-   (:require [seesaw.selector :as selector])
+  (:use [seesaw.core])
+  (:require [seesaw.selector :as selector])
   (:import (java.net Socket)
            (java.io PrintWriter InputStreamReader BufferedReader)))
 
-(defn identify
-  [root]
+(defn identify [root]
   (doseq [w (select root [:*])]
     (if-let [n (.getName w)]
       (selector/id-of! w (keyword n))))
