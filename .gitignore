@@ -1,0 +1,6 @@
+classes
+.classpath
+.project
+.settings
+clojure.jar
+clojure-src.jar
