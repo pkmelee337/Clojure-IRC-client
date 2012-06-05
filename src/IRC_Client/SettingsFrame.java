@@ -14,6 +14,7 @@ public class SettingsFrame extends JPanel {
 	private JTextField textField;
 	private JTextField textField_1;
 	private JTextField textField_2;
+	private JTextField textField_3;
 
 
 	public SettingsFrame() {
@@ -84,5 +85,23 @@ public class SettingsFrame extends JPanel {
 		gbc_textField_2.gridy = 4;
 		add(textField_2, gbc_textField_2);
 		textField_2.setColumns(10);
+		
+		JLabel lblDefaultChannel = new JLabel("Channel:");
+		GridBagConstraints gbc_lblDefaultChannel = new GridBagConstraints();
+		gbc_lblDefaultChannel.anchor = GridBagConstraints.EAST;
+		gbc_lblDefaultChannel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblDefaultChannel.gridx = 0;
+		gbc_lblDefaultChannel.gridy = 5;
+		add(lblDefaultChannel, gbc_lblDefaultChannel);
+		
+		textField_3 = new JTextField();
+		textField_3.setName("Channel");
+		GridBagConstraints gbc_textField_3 = new GridBagConstraints();
+		gbc_textField_3.insets = new Insets(0, 0, 5, 0);
+		gbc_textField_3.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textField_3.gridx = 1;
+		gbc_textField_3.gridy = 5;
+		add(textField_3, gbc_textField_3);
+		textField_3.setColumns(10);
 	}
 }
