@@ -65,6 +65,6 @@
           (def irc(connect (get-in (value form )[ :Server]) (Integer/parseInt(get-in (value form )[ :Port]))))
           (login irc(get-in (value form )[:Nickname]))
           (write irc (str "join #" (get-in (value form )[ :Channel])))
-          [form  (value! (my-form2) defaults)
-          result (-> (dialog :content form) pack! show!)])
+          (let [form2  (value! (my-form2) defaults)
+          result (-> (dialog :content form2) pack! show!)]))
         (println "User canceled")))))
