@@ -17,11 +17,11 @@
     :Channel "clojurehu"})
 
 (defn my-form []
-  (let [form (identify (IRC_Client.SettingsFrame.))]
+  (let [form (identify (java.SettingsFrame.))]
     form))
 
 (defn my-form2 []
-  (let [form (identify (IRC_Client.ChatWindow.))]
+  (let [form (identify (java.ChatWindow.))]
     form))
 
 (def freenode {:name "irc.freenode.net" :port 6667})
