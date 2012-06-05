@@ -66,5 +66,5 @@
           (login irc(get-in (value form )[:Nickname]))
           (write irc (str "join #" (get-in (value form )[ :Channel])))
           [form  (value! (my-form2) defaults)
-          result (-> (dialog :content form :option-type :ok-cancel) pack! show!)])
+          result (-> (dialog :content form) pack! show!)])
         (println "User canceled")))))
