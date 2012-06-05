@@ -1,4 +1,4 @@
-(ns irc
+(ns IRC-Client.core
   (:use [seesaw.core])
   (:require [seesaw.selector :as selector])
   (:import (java.net Socket)
