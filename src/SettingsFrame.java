@@ -1,4 +1,3 @@
-package java;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
