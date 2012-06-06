@@ -1,7 +1,10 @@
-bin
-classes
+/bin/
+/lib/
+/classes/
 .classpath
 .project
 .settings
-clojure.jar
-clojure-src.jar
+pom.xml
+*jar
+.lein-deps-sum
+.cake
