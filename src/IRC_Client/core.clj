@@ -16,6 +16,7 @@
     :Server "irc.freenode.net"
     :Port 6667
     :Channel "clojurehu"})
+(def textbox (text :multi-line? true :border 20))
 
 (defn login-form []
   (let [form (identify (SettingsFrame.))]
@@ -64,5 +65,17 @@
           (login irc(get-in (value form )[:Nickname]))
           (write irc (str "join #" (get-in (value form )[ :Channel])))
           (let [form2  (value! (chat-form) defaults)
-          result (-> (dialog :content form2) pack! show!)]))
+          result (-> (frame :content (vertical-panel
+                                       :items [textbox
+                                               :separator
+                                               (button :text "send" :listen [:action (fn[e] (do
+                                                                                              (write irc (str "PRIVMSG #clojurehu " (value textbox)))
+                                                                                              (value! textbox "")))])
+                                               (horizontal-panel
+                                                 :border "Texxxtt"
+                                                 :items (map (partial radio :text)
+                                                             ["First" "Second" "Third"]))
+                                               (scrollable (text :multi-line? true))]))
+                   pack! show!)])
+           )
         (println "User canceled")))))
