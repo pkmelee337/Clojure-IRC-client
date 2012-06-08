@@ -17,6 +17,7 @@
     :Port 6667
     :Channel "clojurehu"})
 (def textbox (text :multi-line? true :border 20))
+(def textboxoutput (text :multi-line? true :border 20 ))
 
 (defn login-form []
   (let [form (identify (SettingsFrame.))]
@@ -39,12 +40,14 @@
 (defn write [conn msg]
   (doto (:out @conn)
     (.println (str msg "\r"))
-    (.flush)))
+    (.flush))
+  (value! textboxoutput (str(value textboxoutput)\newline msg)))
 
 (defn conn-handler [conn]
   (while (nil? (:exit @conn))
     (let [msg (.readLine (:in @conn))]
       (println msg)
+      (value! textboxoutput (str(value textboxoutput)\newline msg))
       (cond 
        (re-find #"^ERROR :Closing Link:" msg) 
        (dosync (alter conn merge {:exit true}))
@@ -66,10 +69,12 @@
           (write irc (str "join #" (get-in (value form )[ :Channel])))
           (let [form2  (value! (chat-form) defaults)
           result (-> (frame :content (vertical-panel
-                                       :items [textbox
+                                       :items [(scrollable textboxoutput)
+                                               :separator
+                                               textbox
                                                :separator
                                                (button :text "send" :listen [:action (fn[e] (do
-                                                                                              (write irc (str "PRIVMSG #clojurehu " (value textbox)))
+                                                                                              (write irc (str "PRIVMSG #clojurehu :" (value textbox)))
                                                                                               (value! textbox "")))])
                                                (horizontal-panel
                                                  :border "Texxxtt"
