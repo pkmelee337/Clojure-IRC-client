@@ -15,9 +15,9 @@
   { :Nickname "IRC-Client-Test"
     :Server "irc.freenode.net"
     :Port 6667
-    :Channel "clojurehu"})
-(def textbox (text :multi-line? true :border 20))
-(def textboxoutput (text :multi-line? true :border 20 ))
+    :Channel "#clojurehu"})
+(def textbox (text :multi-line? false :border 5 :margin 0))
+(def textboxoutput (text :multi-line? true :border 5 :margin 0 ))
 
 (defn login-form []
   (let [form (identify (SettingsFrame.))]
@@ -29,13 +29,11 @@
 
 (declare conn-handler)
 
-(defn connect [server port]
+(defn make-connection[server port]
   (let [socket (Socket. server port)
         in (BufferedReader. (InputStreamReader. (.getInputStream socket)))
-        out (PrintWriter. (.getOutputStream socket))
-        conn (ref {:in in :out out})]
-    (doto (Thread. #(conn-handler conn)) (.start))
-    conn))
+        out (PrintWriter. (.getOutputStream socket))]
+    (ref {:in in :out out})))
 
 (defn write [conn msg]
   (doto (:out @conn)
@@ -54,9 +52,29 @@
        (re-find #"^PING" msg)
        (write conn (str "PONG "  (re-find #":.*" msg)))))))
 
-(defn login [conn user]
+(defn login! [conn user]
+  (doto (Thread. #(conn-handler conn)) (.start))
   (write conn (str "NICK " user))
   (write conn (str "USER " user " 0 * :" user)))
+
+  (defn irc-speak! [conn channel message]
+    (write conn (str "PRIVMSG " channel " :" message)))
+  
+  (defn join! [conn channel]
+    (write conn (str "join " channel))
+    (let [form  (->(frame :content (vertical-panel
+                                       :items [(scrollable textboxoutput)
+                                               :separator
+                                               textbox
+                                               :separator
+                                               (button :text "send" :listen [:action (fn[e] (do
+                                                                                              (irc-speak! conn "#clojurehu" (value textbox))
+                                                                                              (value! textbox "")))])
+                                               ]) :width 800 :height 600) show!)
+                    ]))
+    
+  
+                             
 
 (defn -main [& args]
   (invoke-later
@@ -64,23 +82,7 @@
           result (-> (dialog :content form :option-type :ok-cancel) pack! show!)]
       (if (= :success result)
         (do
-          (def irc(connect (get-in (value form )[ :Server]) (Integer/parseInt(get-in (value form )[ :Port]))))
-          (login irc(get-in (value form )[:Nickname]))
-          (write irc (str "join #" (get-in (value form )[ :Channel])))
-          (let [form2  (value! (chat-form) defaults)
-          result (-> (frame :content (vertical-panel
-                                       :items [(scrollable textboxoutput)
-                                               :separator
-                                               textbox
-                                               :separator
-                                               (button :text "send" :listen [:action (fn[e] (do
-                                                                                              (write irc (str "PRIVMSG #clojurehu :" (value textbox)))
-                                                                                              (value! textbox "")))])
-                                               (horizontal-panel
-                                                 :border "Texxxtt"
-                                                 :items (map (partial radio :text)
-                                                             ["First" "Second" "Third"]))
-                                               (scrollable (text :multi-line? true))]))
-                   pack! show!)])
-           )
+          (def irc(make-connection (get-in (value form )[:Server]) (Integer/parseInt(get-in (value form )[ :Port]))))
+          (login! irc(get-in (value form )[:Nickname]))
+          (join! irc (get-in (value form )[:Channel]))           )
         (println "User canceled")))))
