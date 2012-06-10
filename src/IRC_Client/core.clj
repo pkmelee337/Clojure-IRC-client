@@ -16,9 +16,9 @@
     :Server "irc.freenode.net"
     :Port 6667
     :Channel "#clojurehu"})
-(def textbox (text :multi-line? false :border 5 :margin 0))
-(def textboxoutput (text :multi-line? true :border 5 :margin 0 ))
-(def namesList (text :multi-line? true :border 5 :margin 0 ))
+(def textbox (text :multi-line? false :bounds[10 542 698 47]))
+(def textboxoutput (text :multi-line? true :editable? false :wrap-lines? true))
+(def namesList (text :multi-line? true :editable? false ))
 
 (defn login-form []
   (let [form (identify (SettingsFrame.))]
@@ -45,7 +45,8 @@
   )
 
 (defn make-namesList [msg]
-  (value! namesList (str (value namesList) (re-find #" :.*" msg)))
+  (value! namesList (str (value namesList) (seq(.split (clojure.string/replace (str(re-find #" :.*" msg)) ":" "") "\\s* \\s*"))   
+                         ))
   )
 
 (defn conn-handler [conn]
@@ -62,12 +63,10 @@
        (make-namesList msg)
        (re-find #"^.*JOIN #" msg)
        (value! namesList (str (value namesList) (clojure.string/replace 
-                          (clojure.string/replace(re-find #":.*!" msg) ":" "")"!" ""))
-               )
+                          (clojure.string/replace(re-find #":.*!" msg) ":" "")"!" "")))
        (re-find #"^.*QUIT" msg)
        (value! namesList (clojure.string/replace(value namesList) (clojure.string/replace 
-                          (clojure.string/replace(re-find #":.*!" msg) ":" "")"!" "") "")
-               )
+                          (clojure.string/replace(re-find #":.*!" msg) ":" "")"!" "") ""))
        )
       )
     )
@@ -89,16 +88,14 @@
     )
   
   (defn chat-form[conn]
-  (frame :content (vertical-panel
-                                       :items [(scrollable textboxoutput)
-                                               :separator
-                                               textbox
-                                               :separator
-                                               (scrollable namesList)
-                                               (button :text "send" :listen [:action (fn[e] (do
-                                                                                              (irc-speak! conn "#clojurehu" (value textbox))
-                                                                                              (value! textbox "")))])
-                                               ]) :width 800 :height 600))
+  (frame :on-close :exit :content (xyz-panel
+                   :items [(scrollable textboxoutput :bounds[123 5 697 526])
+                   textbox
+                   (scrollable namesList :bounds[10 5 108 526])
+                   (button :text "send" :bounds[718 554 72 23] :listen [:action (fn[e] (do
+                                        (irc-speak! conn "#clojurehu" (value textbox))
+                                        (value! textbox "")))])
+                                               ]) :width 850 :height 650))
 
   
   (defn join! [conn channel]
@@ -106,9 +103,6 @@
     (let [form  (-> (chat-form conn) show!)
                     ])
     )
-    
-  
-                             
 
 (defn -main [& args]
   (invoke-later
