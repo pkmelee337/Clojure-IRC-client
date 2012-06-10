@@ -21,11 +21,9 @@
 
 (defn login-form []
   (let [form (identify (SettingsFrame.))]
-    form))
+    form)
+  )
 
-(defn chat-form []
-  (let [form (identify (ChatWindow.))]
-    form))
 
 (declare conn-handler)
 
@@ -33,13 +31,17 @@
   (let [socket (Socket. server port)
         in (BufferedReader. (InputStreamReader. (.getInputStream socket)))
         out (PrintWriter. (.getOutputStream socket))]
-    (ref {:in in :out out})))
+    (atom {:in in :out out})
+    )
+  )
 
 (defn write [conn msg]
   (doto (:out @conn)
     (.println (str msg "\r"))
-    (.flush))
-  (value! textboxoutput (str(value textboxoutput)\newline msg)))
+    (.flush)
+    )
+  (value! textboxoutput (str(value textboxoutput)\newline msg))
+  )
 
 (defn conn-handler [conn]
   (while (nil? (:exit @conn))
@@ -50,19 +52,24 @@
        (re-find #"^ERROR :Closing Link:" msg) 
        (dosync (alter conn merge {:exit true}))
        (re-find #"^PING" msg)
-       (write conn (str "PONG "  (re-find #":.*" msg)))))))
+       (write conn (str "PONG "  (re-find #":.*" msg))))
+      )
+    )
+  )
 
-(defn login! [conn user]
+(defn login! 
+  [conn user]
   (doto (Thread. #(conn-handler conn)) (.start))
   (write conn (str "NICK " user))
-  (write conn (str "USER " user " 0 * :" user)))
+  (write conn (str "USER " user " 0 * :" user))
+  )
 
   (defn irc-speak! [conn channel message]
-    (write conn (str "PRIVMSG " channel " :" message)))
+    (write conn (str "PRIVMSG " channel " :" message))
+    )
   
-  (defn join! [conn channel]
-    (write conn (str "join " channel))
-    (let [form  (->(frame :content (vertical-panel
+  (defn chat-form[conn]
+  (frame :content (vertical-panel
                                        :items [(scrollable textboxoutput)
                                                :separator
                                                textbox
@@ -70,8 +77,14 @@
                                                (button :text "send" :listen [:action (fn[e] (do
                                                                                               (irc-speak! conn "#clojurehu" (value textbox))
                                                                                               (value! textbox "")))])
-                                               ]) :width 800 :height 600) show!)
-                    ]))
+                                               ]) :width 800 :height 600))
+
+  
+  (defn join! [conn channel]
+    (write conn (str "join " channel))
+    (let [form  (-> (chat-form conn) show!)
+                    ])
+    )
     
   
                              
