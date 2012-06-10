@@ -45,7 +45,7 @@
   )
 
 (defn make-namesList [msg]
-  (value! (value namesList) (re-find #" :.*" msg))
+  (value! namesList (str (value namesList) (re-find #" :.*" msg)))
   )
 
 (defn conn-handler [conn]
@@ -60,6 +60,14 @@
        (write conn (str "PONG "  (re-find #":.*" msg)))
        (re-find #"^.*= #" msg)
        (make-namesList msg)
+       (re-find #"^.*JOIN #" msg)
+       (value! namesList (str (value namesList) (clojure.string/replace 
+                          (clojure.string/replace(re-find #":.*!" msg) ":" "")"!" ""))
+               )
+       (re-find #"^.*QUIT" msg)
+       (value! namesList (clojure.string/replace(value namesList) (clojure.string/replace 
+                          (clojure.string/replace(re-find #":.*!" msg) ":" "")"!" "") "")
+               )
        )
       )
     )
