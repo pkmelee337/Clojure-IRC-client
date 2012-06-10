@@ -18,6 +18,7 @@
     :Channel "#clojurehu"})
 (def textbox (text :multi-line? false :border 5 :margin 0))
 (def textboxoutput (text :multi-line? true :border 5 :margin 0 ))
+(def namesList (text :multi-line? true :border 5 :margin 0 ))
 
 (defn login-form []
   (let [form (identify (SettingsFrame.))]
@@ -43,6 +44,10 @@
   (value! textboxoutput (str(value textboxoutput)\newline msg))
   )
 
+(defn make-namesList [msg]
+  (value! (value namesList) (re-find #" :.*" msg))
+  )
+
 (defn conn-handler [conn]
   (while (nil? (:exit @conn))
     (let [msg (.readLine (:in @conn))]
@@ -52,7 +57,10 @@
        (re-find #"^ERROR :Closing Link:" msg) 
        (dosync (alter conn merge {:exit true}))
        (re-find #"^PING" msg)
-       (write conn (str "PONG "  (re-find #":.*" msg))))
+       (write conn (str "PONG "  (re-find #":.*" msg)))
+       (re-find #"^.*= #" msg)
+       (make-namesList msg)
+       )
       )
     )
   )
@@ -68,12 +76,17 @@
     (write conn (str "PRIVMSG " channel " :" message))
     )
   
+   (defn irc-command! [conn message]
+    (write conn message)
+    )
+  
   (defn chat-form[conn]
   (frame :content (vertical-panel
                                        :items [(scrollable textboxoutput)
                                                :separator
                                                textbox
                                                :separator
+                                               (scrollable namesList)
                                                (button :text "send" :listen [:action (fn[e] (do
                                                                                               (irc-speak! conn "#clojurehu" (value textbox))
                                                                                               (value! textbox "")))])
