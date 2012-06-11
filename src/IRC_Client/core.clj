@@ -45,8 +45,7 @@
   )
 
 (defn make-namesList [msg]
-  (value! namesList (str (value namesList) (seq(.split (clojure.string/replace (str(re-find #" :.*" msg)) ":" "") "\\s* \\s*"))   
-                         ))
+  (value! namesList (str (value namesList) (re-find #" :.*" msg)))
   )
 
 (defn conn-handler [conn]
@@ -87,20 +86,20 @@
     (write conn message)
     )
   
-  (defn chat-form[conn]
+  (defn chat-form[conn channel]
   (frame :on-close :exit :content (xyz-panel
                    :items [(scrollable textboxoutput :bounds[123 5 697 526])
                    textbox
                    (scrollable namesList :bounds[10 5 108 526])
                    (button :text "send" :bounds[718 554 72 23] :listen [:action (fn[e] (do
-                                        (irc-speak! conn "#clojurehu" (value textbox))
+                                        (irc-speak! conn channel (value textbox))
                                         (value! textbox "")))])
                                                ]) :width 850 :height 650))
 
   
   (defn join! [conn channel]
     (write conn (str "join " channel))
-    (let [form  (-> (chat-form conn) show!)
+    (let [form  (-> (chat-form conn channel) show!)
                     ])
     )
 
